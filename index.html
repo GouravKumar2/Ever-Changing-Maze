@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ever Changing Maze</title>
+    <!-- <link rel="stylesheet" href="style.css"> -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+
+   
+</head>
+
+<body>
+    <div class="main">
+        <div class="info-panel">
+            <div class="gameinfo">
+                <h2>Ever Changing Maze</h2>
+                <p>Welcome to this dynamic maze game! Your goal is to reach the green cell in the bottom-right corner as
+                    fast as possible.</p>
+                <h3>Rules:</h3>
+                <ul>
+                    <li>Use <b>WASD</b> or <b>Arrow keys</b> to move the red player.</li>
+                    <li>The maze changes as you play!</li>
+                    <li>Timer starts on your first move.</li>
+                    <li>Reach the green cell to win.</li>
+                </ul>
+                <h3>Tips:</h3>
+                <ul>
+                    <li>Plan your moves quickly—the maze is always shifting.</li>
+                    <li>Press <b>reset</b> to restart the game and timer.</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <button id="infoButton" onclick="window.location.href='info.html'">info</button>
+            </div>
+        </div>
+        <div class="maze-side">
+            <div class="maze_container">
+                <div class="mazeheader">
+                    <div id="timer">time: 00:00:000 </div>
+                    <button id="resetButton">reset</button>
+                </div>
+                <div id="maze">
+                    <div id="player"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    const maze = document.getElementById('maze');
+    const player = document.getElementById('player');
+    const timerDisplay = document.getElementById('timer');
+    const resetButton = document.getElementById('resetButton');
+
+    const rows = 20;
+    const cols = 20;
+    const graph = [];
+
+    let origin_r = rows - 1;
+    let origin_c = cols - 1;
+
+    // Player position
+    let player_r = 0;
+    let player_c = 0;
+
+    //Timing setup
+
+    let timerInterval = null;
+    let gameStarted = false;
+    let startTime = null;
+
+    function formatTime(ms) {
+        const minutes = Math.floor(ms / 60000);
+        const seconds = Math.floor((ms % 60000) / 1000);
+        const milliseconds = ms % 1000;
+        return (
+            String(minutes).padStart(2, '0') + ':' +
+            String(seconds).padStart(2, '0') + ':' +
+            String(milliseconds).padStart(3, '0')
+        );
+    }
+
+    function startTimer() {
+        if (!gameStarted) {
+            gameStarted = true;
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                timerDisplay.textContent = `time: ${formatTime(elapsed)}`;
+            }, 20);
+        }
+    }
+
+    function stopTimer() {
+        clearInterval(timerInterval);
+        resetButton.style.display = "inline-block";
+        timerDisplay.style.color = "green";
+    }
+
+    function resetGame() {
+        timerDisplay.style.color = "black";
+        player_r = 0;
+        player_c = 0;
+        updatePlayerPosition();
+        gameStarted = false;
+        startTime = null;
+        timerDisplay.textContent = "time: 00:00:000";
+        // resetButton.style.display = "none";
+        clearInterval(timerInterval);
+    }
+
+    resetButton.addEventListener("click", resetGame);
+
+
+    function updatePlayerPosition() {
+        player.style.top = `${player_r * 30 + 5}px`;
+        player.style.left = `${player_c * 30 + 5}px`;
+    }
+
+    function openPath(cell1, cell2, direction) {
+        if (direction === "right") {
+            cell1.style.borderRight = "none";
+            cell2.style.borderLeft = "none"
+
+        } else if (direction === "down") {
+            cell1.style.borderBottom = "none";
+            cell2.style.borderTop = "none";
+
+        } else if (direction === "left") {
+            cell1.style.borderLeft = "none";
+            cell2.style.borderRight = "none";
+
+        } else if (direction === "up") {
+            cell1.style.borderTop = "none";
+            cell2.style.borderBottom = "none";
+
+        }
+    }
+
+    function closePath(cell, direction) {
+        if (direction === "right") {
+            const othercell = document.getElementById(`cell-${origin_r}-${origin_c + 1}`);
+            cell.style.borderRight = "1px solid black";
+            othercell.style.borderLeft = "1px solid black";
+        }
+        else if (direction === "down") {
+            const othercell = document.getElementById(`cell-${origin_r + 1}-${origin_c}`);
+            cell.style.borderBottom = "1px solid black";
+            othercell.style.borderTop = "1px solid black";
+        }
+        else if (direction === "left") {
+
+            const othercell = document.getElementById(`cell-${origin_r}-${origin_c - 1}`);
+            cell.style.borderLeft = "1px solid black";
+            othercell.style.borderRight = "1px solid black";
+        }
+        else if (direction === "up") {
+
+            const othercell = document.getElementById(`cell-${origin_r - 1}-${origin_c}`);
+            cell.style.borderTop = "1px solid black";
+            othercell.style.borderBottom = "1px solid black";
+        }
+    }
+
+    //We create a trivial perfect maze
+
+    for (let r = 0; r < rows; r++) {
+        const row = [];
+        for (let c = 0; c < cols; c++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            cell.id = `cell-${r}-${c}`;
+
+            maze.appendChild(cell);
+
+            const node = {
+                r,
+                c,
+                direction: "none"
+            };
+
+            if (c < cols - 1) {
+                node.direction = "right";
+            }
+            else if (c == cols - 1 && r < rows - 1) {
+                node.direction = "down";
+            }
+            else if (c == cols - 1 && r == rows - 1) {
+                node.direction = "none";
+            }
+            row.push(node);
+        }
+        graph.push(row);
+    }
+
+    const goalCell = document.getElementById(`cell-${rows - 1}-${cols - 1}`);
+    goalCell.classList.add("goal");
+
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            const cell = document.getElementById(`cell-${r}-${c}`);
+            const node = graph[r][c];
+
+            if (node.direction === "right") {
+                const othercell = document.getElementById(`cell-${r}-${c + 1}`);
+                openPath(cell, othercell, "right");
+            } else if (node.direction === "down") {
+
+                const othercell = document.getElementById(`cell-${r + 1}-${c}`);
+                openPath(cell, othercell, "down");
+            } else if (node.direction === "left") {
+
+                const othercell = document.getElementById(`cell-${r}-${c - 1}`);
+                openPath(cell, othercell, "left");
+            } else if (node.direction === "up") {
+
+                const othercell = document.getElementById(`cell-${r - 1}-${c}`);
+                openPath(cell, othercell, "up");
+            }
+        }
+    }
+
+
+
+    function select_random_direction() {
+        let randomOption = Math.floor(Math.random() * 4);
+        if (randomOption == 0) {
+            if (origin_r == 0) {
+                return select_random_direction();
+            }
+            return "up";
+        } else if (randomOption == 1) {
+            if (origin_r == rows - 1) {
+                return select_random_direction();
+            }
+            return "down";
+        } else if (randomOption == 2) {
+            if (origin_c == 0) {
+                return select_random_direction();
+            }
+            return "left";
+        } else {
+            if (origin_c == cols - 1) {
+                return select_random_direction();
+            }
+            return "right";
+        }
+    }
+
+    // This function moves the origin of maze 1 step in a random direction
+
+    function changeOrigin() {
+        let new_direction = select_random_direction();
+        let old_origin = graph[origin_r][origin_c];
+        let old_origin_cell = document.getElementById(`cell-${origin_r}-${origin_c}`);
+
+        if (new_direction == "up") {
+            origin_r--;
+        }
+        else if (new_direction == "down") {
+            origin_r++;
+        }
+        else if (new_direction == "left") {
+            origin_c--;
+        }
+        else if (new_direction == "right") {
+            origin_c++;
+        }
+
+        let new_origin = graph[origin_r][origin_c];
+        let new_origin_cell = document.getElementById(`cell-${origin_r}-${origin_c}`);
+
+        old_origin.direction = new_direction;
+        openPath(old_origin_cell, new_origin_cell, new_direction);
+
+        let old_direction = new_origin.direction;
+        new_origin.direction = "none";
+
+        if (!((new_direction == "left" && old_direction == "right") ||
+            (new_direction == "right" && old_direction == "left") ||
+            (new_direction == "up" && old_direction == "down") ||
+            (new_direction == "down" && old_direction == "up"))) {
+
+            closePath(new_origin_cell, old_direction);
+        }
+    }
+
+
+    // To generate the starting maze structure, we need to chang origin about rows*cols*10 times
+
+    for (let i = 0; i < rows * cols * 10; i++) {
+        changeOrigin();
+    }
+
+
+    //Now we just keep changing the origin
+
+    async function changeMaze() {
+        while (true) {
+            changeOrigin();
+            await new Promise(resolve => setTimeout(resolve, 1));
+        }
+    }
+
+    changeMaze();
+
+
+
+    document.addEventListener("keydown", (e) => {
+        let new_r = player_r;
+        let new_c = player_c;
+        if (e.key === "ArrowUp" || e.key.toLowerCase() === "w") new_r--;
+        if (e.key === "ArrowDown" || e.key.toLowerCase() === "s") new_r++;
+        if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") new_c--;
+        if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") new_c++;
+
+        if (new_r < 0 || new_r >= rows || new_c < 0 || new_c >= cols) return;
+
+        const currCell = document.getElementById(`cell-${player_r}-${player_c}`);
+        const newCell = document.getElementById(`cell-${new_r}-${new_c}`);
+
+        // Check if there's no wall between cells
+        if ((new_r < player_r && currCell.style.borderTop === "none") ||
+            (new_r > player_r && currCell.style.borderBottom === "none") ||
+            (new_c < player_c && currCell.style.borderLeft === "none") ||
+            (new_c > player_c && currCell.style.borderRight === "none")) {
+
+            startTimer();
+            player_r = new_r;
+            player_c = new_c;
+            updatePlayerPosition();
+
+            if (player_r === rows - 1 && player_c === cols - 1) {
+                stopTimer();
+            }
+        }
+    });
+
+    updatePlayerPosition();
+
+</script>
+
+</html>

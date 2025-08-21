@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ever changing Maze</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Space Mono", monospace;
+            
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        p{
+            font-size: 17px;
+        }
+
+        .main {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #ffffff;
+        }
+
+        .infobox {
+            width: 70%;
+            min-height: 600px;
+            background: #f7f7f7;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .header{
+            width: 70%;
+            padding: 10px 10px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            color: #1500fd;
+        }
+        .info{
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .footer{
+            color: rgb(117, 117, 117);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <div class="header">
+            <a href="index.html">go back</a>
+        </div>
+        <div class="infobox">
+           
+            <div class="info">
+                <h1>Ever Changing Maze</h1>
+                <p>This game works on a new maze generation algorithm invented by <a
+                        href="https://www.youtube.com/@captainluma7991"><b>@captainluma7991</b></a> on Youtube. <br>
+                    The algorithm is called <b>Origin Shift</b><br>
+                    It goes as follows: <br>
+                </p>
+                <p>
+
+                    1. Start with a grid of nodes. Each has a direction property that can point nowhere, or to one of
+                    its
+                    neighbors.<br>
+                </p>
+                <p>
+                    2. Initialize the grid to be any perfect maze, that being a maze with no loops or isolated areas.
+                    Each
+                    node should point to one neighboring node, with a single node, the origin node, pointing
+                    nowhere.<br>
+                </p>
+                <p>
+                    3. Repeat the following steps for as many iterations as you'd like:<br>
+                    <span style="margin-left:2em; display:inline-block;">3a. Have the origin node, point to a random
+                        neighboring node.</span><br>
+                    <span style="margin-left:2em; display:inline-block;">3b. That neigboring node becomes the new origin
+                        node.</span><br>
+                    <span style="margin-left:2em; display:inline-block;">3c. have the new origin node point
+                        nowhere.</span><br>
+                </p>
+                <p>
+
+                </p>
+                <p>
+                    This is a working implementation of the algorithm described above in a fully working game format by
+                    me.
+                </p>
+            </div>
+            <div class="footer">
+                <a href="https://github.com/GouravKumar2">@GouravKumar2</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
